@@ -1,13 +1,14 @@
 import User from "../models/User"; // Import User with an uppercase 'U'
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
     // Check if a user exists
     let existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User has already registered" });
+      // return res.status(400).json({ message: "User has already registered" });
+      throw new Error("User has already registered");
     }
 
     // Create a new user
@@ -24,12 +25,7 @@ export const registerUser = async (req, res) => {
       token: await newUser.generateJWT(),
     });
   } catch (error) {
-    console.error("Error:", error.message); // Log the error message
-    console.error("Stack Trace:", error.stack); // Log the error stack trace
-
-    return res
-      .status(500)
-      .json({ message: "Oops! Something went horribly wrong..." });
+    next(error);
   }
 };
 export { registerUser };
